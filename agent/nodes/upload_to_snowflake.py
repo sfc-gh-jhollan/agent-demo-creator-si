@@ -8,7 +8,9 @@ def get_snowflake_session(context):
     # Reuse the session from the context or create a new one if not available
     session = context.get("snowflake_session")
     if not session:
-        session = Session.builder.config("CONNECTION_NAME", "si-prod3").getOrCreate()
+        session = Session.builder.config(
+            "CONNECTION_NAME", os.getenv("SNOWFLAKE_CONNECTION_NAME", "agent-creator")
+        ).getOrCreate()
         schema = context.get("schema", "DEFAULT")
         session.sql(f"CREATE SCHEMA IF NOT EXISTS {schema}").collect()
         session.use_schema(schema)
