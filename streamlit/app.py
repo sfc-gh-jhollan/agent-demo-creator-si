@@ -12,11 +12,16 @@ from agent import app as agent
 
 
 # Initialize Streamlit app
-st.title("Demo Creator Chat Interface")
+st.title("Demo Creator Agent")
 
 # Session state to manage context
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [
+        {
+            "role": "assistant",
+            "content": "Welcome to the Snowflake Intelligence demo creator. Let me know the organization you want to create a demo for, or any other details that will help me in coming up with a demo idea. Based on what you share with me I can come up with a demo idea and then help get the demo built and setup in your Snowflake account.",
+        }
+    ]
 if "status_updates" not in st.session_state:
     st.session_state.status_updates = []
 if "thread_config" not in st.session_state:
