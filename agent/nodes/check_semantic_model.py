@@ -30,7 +30,7 @@ def check_semantic_model(context, writer):
         YOU MUST include a set of sample values for a table.
         YOU MUST ensure that `name`, `description`, `tables`, and `relationships` are all top level YAML properties (not nested under any other property).
         YOU MUST ensure that any relationships have identical columns names for `left_column` and `right_column`. If the column names are not identical, no relationship exists.
-        YOU MUST ensure that the table with "one" in a join relationship has `primary_key` defined for the table with the column name listed
+        YOU MUST ensure any table defined in a relationship has `primary_key` columns defined in the `tables` section.
 
         DO NOT include any verified queries or metrics in the semantic model.
         DO NOT include ``` characters in the response
@@ -77,8 +77,9 @@ def check_semantic_model(context, writer):
 
         ## THINGS TO CONFIRM ##
         - If relationships exist, the left and right columns defined have identical values. If they are not identical or no left and right columns are defined, there's likely no relationship in the synthentic dataset.
-        - If a relationship is defined, the table with "one" in the relationship has a `primary_key` defined for the column listed in the `tables` section for that table
+        - If a relationship is defined, all tables included in a relationship have one or many `primary_key` defined in the `tables` section.
         - Formatting and indentation is consistent and correct. `name`, `description`, `tables`, and `relationships` are all top level YAML properties
+        - Table descriptions and column synonyms are sufficient to capture any context in included questions.
 
         """,
     )

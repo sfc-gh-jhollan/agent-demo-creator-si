@@ -23,7 +23,7 @@ def generate_semantic_model(context, writer):
         YOU MUST include a set of sample values for a table.
         YOU MUST ensure that `name`, `description`, `tables`, and `relationships` are all top level YAML properties (not nested under any other property).
         YOU MUST ensure that any relationships have identical columns names for `left_column` and `right_column`. If the column names are not identical, no relationship exists.
-        YOU MUST ensure that the table with "one" in a join relationship has `primary_key` defined for the table with the column name listed
+        YOU MUST ensure any table defined in a relationship has `primary_key` columns defined in the `tables` section.
         DO NOT include any verified queries or metrics in the semantic model.
         DO NOT include ``` characters in the response
         DO NOT add any properties or aspects to YAML that aren't explicitly documented
