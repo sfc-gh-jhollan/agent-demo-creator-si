@@ -1,0 +1,12 @@
+python-dotenv
+pandas
+numpy
+langgraph
+langchain
+langchainhub
+langchain-openai
+langchain-community
+snowflake
+snowflake-snowpark-python[modin]
+streamlit
+faker
