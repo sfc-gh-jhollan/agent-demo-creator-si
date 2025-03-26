@@ -1,6 +1,14 @@
 # Agent Demo Creator
 
-An Agent of Agents
+An Agent of Agents. This is a LangGraph agent that will help come up with an idea for a demo of Snowflake Intelligence, generate all the necessary data required to power the demo, create the necessary semantic models / search services, and register it in a Snowflake Account.
+
+![Screenshot](./assets/screenshot.png)
+
+## Information
+
+Based on my own usage I'd say 70% of the time it works perfectly with all valid artifacts and a working demo. When it fails, it almost always fails because the semantic model it generates is invalid. You can either open up the schema it creates and find the MODELS folder to try to fix the semantic model yourself (for instance, using the Snowflake Cortex Studio analyst UI), or you can see the semantic model in your file structure called `semantic_model.yaml` and try to fix and then replace the model in the stage.
+
+You may also notice some of the questions it built data to answer the Agent may not answer as intended. But it gives you a good starting point.
 
 ## Setup
 
