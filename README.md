@@ -12,7 +12,7 @@ You may also notice some of the questions it built data to answer the Agent may 
 
 ## Setup
 
-*This assumes you already have an account with Snowflake Intelligence and the setup steps completed (e.g. there is a `SNOWFLAKE_INTELLIGENCE.AGENTS.CONFIG` table in your account).*
+**This assumes you already have an account with Snowflake Intelligence and the setup steps completed (e.g. there is a `SNOWFLAKE_INTELLIGENCE.AGENTS.CONFIG` table in your account).**
 
 1. Clone this repository, and navigate to the folder
 2. Create a virtual environment
