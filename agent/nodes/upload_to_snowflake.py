@@ -187,7 +187,7 @@ def create_agent(context, writer):
             )
         ),   -- tool_resources
         null,          -- tool_choice
-        NULL;       -- tool_choice_reason
+        NULL, null;       -- tool_choice_reason
         """.format(
             agent_name=agent_name,
             cortex_search_path=context.get("cortex_search_path"),
