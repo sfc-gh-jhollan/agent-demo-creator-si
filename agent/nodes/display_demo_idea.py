@@ -14,7 +14,8 @@ def display_demo_idea(context, writer):
 
         Be sure to include the annotations, if included, for if SQL or Search for each question.
 
-        Ask for any changes or if they are ok with using this demo to generate datasets and materials.
+        Conclude by asking the user for confirmation if they are ok to proceed with creating the demo, or to suggest any changes. 
+        Word the question in a way so that if a user just responds with "yes" it means they approve the demo as written.
 
         ### DEMO IDEA ###
         {demo_description}

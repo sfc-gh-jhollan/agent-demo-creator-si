@@ -36,6 +36,8 @@ def generate_demo_scenario(context, writer):
             can answer. Usually about 2-3 questions should require SQL execution, ideally at least one of them is rendered by the AI as a chart
             like a line chart. Then 1 or 2 questions can require the Search or RAG style answering. 
 
+            Avoid questions that will require multiple SQL queries to answer, instead seperate each potential query as its own question.
+
             After creating the demo idea, we will use AI to help generate a synthetic dataset to load into Snowflake Intelligence.
 
             For each question, YOU MUST annotate the question with a category if either "SQL" or "Search" (or RAG) to indicate which strategy would be used to answer. 

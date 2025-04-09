@@ -14,10 +14,13 @@ def evaluate_human_feedback(context, writer):
 
     prompt = ChatPromptTemplate.from_template(
         """
-        Evaluate the user response here. This is a response to a question for feedback on an idea for a demo. 
-        Look at what they are saying and determine if any adjustments or changes are being suggested. 
+        Evaluate the user response here. We just presented them with an idea for a demo and asked them
+        if we should generate it. Only approve this demo if the customer answers in the affirmative or 
+        instructs to continue without any edits or feedback.
+
+        If the user provides an suggested edits or updates, even small ones, return false for approved.
         
-        If they approve of the demo based on human feedback, return "true" for the property "approved."
+        If they answer with confirmation and no suggested changes, return "true" for the property "approved."
 
         Return a structured response with the following format:
         - approved: true/false
