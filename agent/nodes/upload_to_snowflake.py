@@ -40,10 +40,16 @@ def upload_to_snowflake(context, writer):
         # Drop existing table and detect/convert date-like columns
         session.sql(f"DROP TABLE IF EXISTS {table_name}").collect()
         date_cols = set()
+        # Only convert columns where at least 80% of values match the YYYY-MM-DD pattern
+        date_threshold = 0.8
         for col_name in df.columns:
-            parsed = pd.to_datetime(df[col_name], errors="coerce")
-            if parsed.notna().sum() >= len(df) * 0.8:
-                df[col_name] = parsed.dt.date
+            series_str = df[col_name].astype(str)
+            mask = series_str.str.match(r"^\d{4}-\d{2}-\d{2}$")
+            if mask.sum() >= len(df) * date_threshold:
+                # safely parse strictly formatted dates
+                df[col_name] = pd.to_datetime(
+                    df[col_name], format="%Y-%m-%d", errors="coerce"
+                ).dt.date
                 date_cols.add(col_name)
 
         # Build column definitions based on detected types
