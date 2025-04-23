@@ -37,11 +37,36 @@ def upload_to_snowflake(context, writer):
 
         df.columns = [col.upper() for col in df.columns]
 
+        # Drop existing table and detect/convert date-like columns
+        session.sql(f"DROP TABLE IF EXISTS {table_name}").collect()
+        date_cols = set()
+        for col_name in df.columns:
+            parsed = pd.to_datetime(df[col_name], errors="coerce")
+            if parsed.notna().sum() >= len(df) * 0.8:
+                df[col_name] = parsed.dt.date
+                date_cols.add(col_name)
+
+        # Build column definitions based on detected types
+        col_defs = []
+        for col_name in df.columns:
+            if col_name in date_cols:
+                col_type = "DATE"
+            elif pd.api.types.is_integer_dtype(df[col_name]):
+                col_type = "NUMBER"
+            elif pd.api.types.is_float_dtype(df[col_name]):
+                col_type = "FLOAT"
+            else:
+                max_len = df[col_name].astype(str).map(len).max() or 1
+                col_type = f"VARCHAR({max_len})"
+            col_defs.append(f"{col_name} {col_type}")
+
+        # Create table with schema and load data
+        session.sql(f"CREATE TABLE {table_name} ({', '.join(col_defs)})").collect()
         session.write_pandas(
             df,
             table_name,
-            auto_create_table=True,
-            overwrite=True,
+            auto_create_table=False,
+            overwrite=False,
             quote_identifiers=False,
         )
 
