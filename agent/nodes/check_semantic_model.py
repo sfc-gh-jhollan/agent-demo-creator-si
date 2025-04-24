@@ -78,7 +78,7 @@ def check_semantic_model(context, writer):
         ## THINGS TO CONFIRM ##
         - If relationships exist, the left and right columns defined have identical values. If they are not identical or no left and right columns are defined, there's likely no relationship in the synthentic dataset.
         - If a relationship is defined, all tables included in a relationship have one or many `primary_key` defined in the `tables` section.
-        - Formatting and indentation is consistent and correct. `name`, `description`, `tables`, and `relationships` are all top level YAML properties
+        - Formatting and indentation is consistent and correct. `name`, `description`, `tables`, and `relationships` are all top level YAML properties, and should not be nested or indented under any other property.
         - Table descriptions and column synonyms are sufficient to capture any context in included questions.
 
         """,

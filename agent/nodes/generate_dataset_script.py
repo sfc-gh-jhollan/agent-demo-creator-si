@@ -61,7 +61,7 @@ def generate_dataset_script(context, writer):
         Return the results in the following format:
         - script: Python script contents (.py) file to generate synthetic datasets.
         - schema: A suggested Schema name in Snowflake to store all these tables. This should be a valid Snowflake schema name, often it's the name of the company or the project.
-        - agent_name: The name of the agent to be created in Snowflake. Ideally 1-3 words
+        - agent_name: The name of the agent to be created in Snowflake. Ideally 1-3 words, with spaces. Example: "Sales Insights Agent", "Bose Audio Agent", "Disney Marketing Agent."
 
         ### Demo description ###
         {demo_description}

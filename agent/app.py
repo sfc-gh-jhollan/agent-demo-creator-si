@@ -46,6 +46,12 @@ class AppState(TypedDict):
     semantic_model_path: str
     schema: str
     agent_name: str
+    agent_description_markdown: str
+    sample_q_1: str
+    sample_q_2: str
+    sample_q_3: str
+    sample_q_4: str
+    sample_q_5: str
 
 
 # Update the StateGraph to use the defined schema

@@ -188,7 +188,7 @@ def create_agent(context, writer):
         INSERT into snowflake_intelligence.agents.config
         select
         '{agent_name}',  -- agent_name
-        null,          -- agent_description
+        '{agent_description_markdown}',          -- agent_description
         ['PUBLIC'],    -- grantee_roles
         -- Tools following the tool_specifications 
         array_construct(
@@ -218,11 +218,33 @@ def create_agent(context, writer):
             )
         ),   -- tool_resources
         null,          -- tool_choice
-        NULL, null;       -- tool_choice_reason
+        NULL, array_construct(
+            object_construct(
+            'text', '{sample_q_1}'
+            ),
+            object_construct(
+            'text', '{sample_q_2}'
+            ),
+            object_construct(
+            'text', '{sample_q_3}'
+            ),
+            object_construct(
+            'text', '{sample_q_4}'
+            ),
+            object_construct(
+            'text', '{sample_q_5}'
+            )
+        );       -- tool_choice_reason
         """.format(
             agent_name=agent_name,
+            agent_description_markdown=context.get("agent_description_markdown", ""),
             cortex_search_path=context.get("cortex_search_path"),
             semantic_model_path=context.get("semantic_model_path"),
+            sample_q_1=context.get("sample_q_1", ""),
+            sample_q_2=context.get("sample_q_2", ""),
+            sample_q_3=context.get("sample_q_3", ""),
+            sample_q_4=context.get("sample_q_4", ""),
+            sample_q_5=context.get("sample_q_5", ""),
         )
     ).collect()
 
