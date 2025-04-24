@@ -75,6 +75,7 @@ from nodes.fix_python_script import fix_python_script
 from nodes.check_dataset_script import check_dataset_script
 from nodes.check_semantic_model import check_semantic_model
 from nodes.display_results import display_results
+from nodes.generate_agent_description import generate_agent_description
 
 workflow.add_node("GenerateDemoScenario", generate_demo_scenario)
 workflow.add_node("DisplayDemoIdea", display_demo_idea)
@@ -91,6 +92,7 @@ workflow.add_node("CreateAgent", create_agent)
 workflow.add_node("CheckDatasetScript", check_dataset_script)
 workflow.add_node("CheckSemanticModel", check_semantic_model)
 workflow.add_node("DisplayResults", display_results)
+workflow.add_node("GenerateAgentDescription", generate_agent_description)
 
 
 workflow.add_edge(START, "GenerateDemoScenario")
@@ -114,7 +116,8 @@ workflow.add_edge("UploadToSnowflake", "GenerateSemanticModel")
 workflow.add_edge("GenerateSemanticModel", "CheckSemanticModel")
 workflow.add_edge("CheckSemanticModel", "UploadSemanticModel")
 workflow.add_edge("UploadSemanticModel", "CreateCortexSearch")
-workflow.add_edge("CreateCortexSearch", "CreateAgent")
+workflow.add_edge("CreateCortexSearch", "GenerateAgentDescription")
+workflow.add_edge("GenerateAgentDescription", "CreateAgent")
 workflow.add_edge("CreateAgent", "DisplayResults")
 workflow.add_edge("DisplayResults", END)
 

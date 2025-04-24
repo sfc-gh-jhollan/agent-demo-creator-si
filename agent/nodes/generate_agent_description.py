@@ -4,7 +4,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.types import Command
 
 
-def generate_demo_scenario(context, writer):
+def generate_agent_description(context, writer):
     writer("Generating Agent description...")
 
     class AgentDescriptionOutput(BaseModel):

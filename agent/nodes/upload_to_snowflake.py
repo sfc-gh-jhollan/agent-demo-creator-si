@@ -237,14 +237,16 @@ def create_agent(context, writer):
         );       -- tool_choice_reason
         """.format(
             agent_name=agent_name,
-            agent_description_markdown=context.get("agent_description_markdown", ""),
+            agent_description_markdown=context.get(
+                "agent_description_markdown", ""
+            ).replace("'", '"'),
             cortex_search_path=context.get("cortex_search_path"),
             semantic_model_path=context.get("semantic_model_path"),
-            sample_q_1=context.get("sample_q_1", ""),
-            sample_q_2=context.get("sample_q_2", ""),
-            sample_q_3=context.get("sample_q_3", ""),
-            sample_q_4=context.get("sample_q_4", ""),
-            sample_q_5=context.get("sample_q_5", ""),
+            sample_q_1=context.get("sample_q_1", "").replace("'", '"'),
+            sample_q_2=context.get("sample_q_2", "").replace("'", '"'),
+            sample_q_3=context.get("sample_q_3", "").replace("'", '"'),
+            sample_q_4=context.get("sample_q_4", "").replace("'", '"'),
+            sample_q_5=context.get("sample_q_5", "").replace("'", '"'),
         )
     ).collect()
 
