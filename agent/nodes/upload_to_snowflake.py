@@ -179,63 +179,51 @@ def create_agent(context, writer):
     schema = session.get_current_schema()
     session.sql(
         """
-        DELETE FROM snowflake_intelligence.agents.config
-        WHERE agent_name like '%Demo Agent%';
-        """
-    ).collect()
-    session.sql(
-        """
-        INSERT into snowflake_intelligence.agents.config
-        select
-        '{agent_name}',  -- agent_name
-        '{agent_description_markdown}',          -- agent_description
-        ['PUBLIC'],    -- grantee_roles
-        -- Tools following the tool_specifications 
-        array_construct(
-            object_construct(
-                    'tool_spec', object_construct(
-
-                'name', 'Documents',
-                'type', 'cortex_search'
-                )
-            ),
-            object_construct(
-                'tool_spec', object_construct(
-
-                'name', 'Snowflake',
-                'type', 'cortex_analyst_text_to_sql'
-                )
-            )
-        ),
-        -- Tool resources following the tool_resources documentation. 
-        object_construct(
-            'Documents', object_construct(
-                'id_column', 'DOCUMENT_URL',
-                'name', '{cortex_search_path}'
-            ),
-            'Snowflake', object_construct(
-                'semantic_model_file', '{semantic_model_path}'
-            )
-        ),   -- tool_resources
-        null,          -- tool_choice
-        NULL, array_construct(
-            object_construct(
-            'text', '{sample_q_1}'
-            ),
-            object_construct(
-            'text', '{sample_q_2}'
-            ),
-            object_construct(
-            'text', '{sample_q_3}'
-            ),
-            object_construct(
-            'text', '{sample_q_4}'
-            ),
-            object_construct(
-            'text', '{sample_q_5}'
-            )
-        );       -- tool_choice_reason
+            CREATE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.{agent_api_path}
+            WITH PROFILE='{{ "display_name": "{agent_name}" }}'
+                COMMENT=$${agent_description_markdown}$$
+            FROM SPECIFICATION $$
+            {{
+                "models": {{ "orchestration": "auto" }},
+                "instructions": {{
+                    "response": "",
+                    "orchestration": "",
+                    "sample_questions": [
+                        {{ "question": "{sample_q_1}" }},
+                        {{ "question": "{sample_q_2}" }},
+                        {{ "question": "{sample_q_3}" }},
+                        {{ "question": "{sample_q_4}" }},
+                        {{ "question": "{sample_q_5}" }}
+                    ]
+                }},
+                "tools": [
+                    {{
+                        "tool_spec": {{
+                        "name": "Documents",
+                        "type": "cortex_search"
+                        }}
+                    }},
+                    {{
+                        "tool_spec": {{
+                        "name": "Snowflake_Data",
+                        "type": "cortex_analyst_text_to_sql"
+                        }}
+                    }}
+                ],
+                "tool_resources": {{
+                    "Documents": {{
+                        "id_column": "DOCUMENT_URL",
+                        "max_results": 10,
+                        "name": "{cortex_search_path}"
+                    }},
+                    "Snowflake_Data": {{
+                        "semantic_model_file": "{semantic_model_path}"
+                    }}
+                    }}
+            }}
+            $$;
         """.format(
+            agent_api_path=agent_name.replace(" ", "_").upper(),
             agent_name=agent_name,
             agent_description_markdown=context.get(
                 "agent_description_markdown", ""
