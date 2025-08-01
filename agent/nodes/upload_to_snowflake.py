@@ -164,8 +164,7 @@ def create_cortex_search(context, writer):
                 TEXT,DOCUMENT_TITLE,DOCUMENT_URL
             FROM DOCUMENTS
         );
-""",
-        warehouse,
+"""
     ).collect()
 
     context["cortex_search_path"] = f"{database}.{schema}.SEARCH"
