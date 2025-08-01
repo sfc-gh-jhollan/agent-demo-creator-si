@@ -10,3 +10,4 @@ snowflake
 snowflake-snowpark-python[modin]
 streamlit
 faker
+snowflake-connector-python[secure-local-storage]

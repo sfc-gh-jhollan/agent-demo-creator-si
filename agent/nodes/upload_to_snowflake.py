@@ -149,13 +149,14 @@ def create_cortex_search(context, writer):
 
     database = session.get_current_database().replace('"', "")
     schema = session.get_current_schema().replace('"', "")
+    warehouse = session.get_current_warehouse()
     session.sql(
-        """
+        f"""
         CREATE OR REPLACE CORTEX SEARCH SERVICE SEARCH 
         ON TEXT 
         ATTRIBUTES
             DOCUMENT_TITLE,DOCUMENT_URL 
-        WAREHOUSE = SNOWFLAKE_INTELLIGENCE_WH 
+        WAREHOUSE = {warehouse}
         EMBEDDING_MODEL = 'snowflake-arctic-embed-m-v1.5' 
         TARGET_LAG = '1 day' 
         AS (
@@ -163,7 +164,8 @@ def create_cortex_search(context, writer):
                 TEXT,DOCUMENT_TITLE,DOCUMENT_URL
             FROM DOCUMENTS
         );
-"""
+""",
+        warehouse,
     ).collect()
 
     context["cortex_search_path"] = f"{database}.{schema}.SEARCH"

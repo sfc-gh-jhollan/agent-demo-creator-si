@@ -17,8 +17,16 @@ from pydantic import BaseModel, Field
 load_dotenv()
 
 # Initialize OpenAI API
-openai_api_key = os.getenv("OPENAI_API_KEY")
-openai_client = OpenAI(api_key=openai_api_key)
+# openai_api_key = os.getenv("OPENAI_API_KEY")
+# openai_client = OpenAI(api_key=openai_api_key)
+snowflake_pat = os.getenv("SNOWFLAKE_PAT")
+snowflake_base_url = os.getenv(
+    "SNOWFLAKE_BASE_URL", "https://your-snowflake-account.snowflakecomputing.com"
+)
+openai_client = OpenAI(
+    api_key=snowflake_pat,
+    base_url=snowflake_base_url,
+)
 
 
 # Define the state schema

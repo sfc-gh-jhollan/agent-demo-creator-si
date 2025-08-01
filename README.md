@@ -41,11 +41,11 @@ You may also notice some of the questions it built data to answer the Agent may 
     user = "<your-username>"
     authenticator = "externalbrowser"
     database = "SNOWFLAKE_INTELLIGENCE_DEMOS"
-    warehouse = "SNOWFLAKE_INTELLIGENCE_WH"
+    warehouse = "<warehouse>"
     role = "ACCOUNTADMIN"
     ```
 
-5. Rename `.env.sample` to `.env` and replace the values with the right values for your environment.
+5. Rename `.env.sample` to `.env` and replace the values with the right values for your environment. By default the agent uses Snowflake Cortex so you need a SNOWFLAKE_PAT token and SNOWFLAKE_BASE_URL for your account. You can also provide an OPENAI_API_KEY if you want to use OpenAI's API directly. However, if you use OpenAI you will need to edit agent/app.py and switch out the open_ai_client code.
 
 6. Run the Streamlit UI
 
