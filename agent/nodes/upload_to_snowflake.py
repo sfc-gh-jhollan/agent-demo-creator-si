@@ -2,6 +2,9 @@ import os
 import pandas as pd
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col
+from langchain.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
 
 
 def get_snowflake_session(context):
@@ -171,71 +174,154 @@ def create_cortex_search(context, writer):
     return context
 
 
+def generate_tool_descriptions(context, writer):
+    """Generate descriptions for the tools using LLM based on semantic model and documents"""
+    writer("Generating tool descriptions using LLM...")
+
+    # Generate description for Snowflake_Data tool based on semantic model
+    semantic_model_prompt = ChatPromptTemplate.from_template(
+        """
+        Based on the following semantic model YAML content, generate a comprehensive description for a Cortex Analyst tool.
+        The description should explain what tables are available, their purpose, key columns, and how they relate to each other.
+        Format it as a detailed technical description that would help an agent understand what data it can query.
+        
+        Include details about:
+        - Each table's purpose and contents
+        - Key columns and their meanings
+        - Relationships between tables
+        - The overall reasoning for how these tables work together
+        
+        Semantic Model:
+        {semantic_model_yaml}
+        """
+    )
+
+    # Generate description for Documents tool based on CSV content
+    documents_prompt = ChatPromptTemplate.from_template(
+        """
+        Based on the document data that will be available in the Cortex Search service, generate a brief description
+        of what types of documents and information are available for search.
+        
+        Document types and content:
+        {document_info}
+        
+        Generate a concise description (1-2 sentences) explaining what documents are available for search.
+        """
+    )
+
+    llm = ChatOpenAI(model_name="gpt-4o")
+
+    # Read semantic model
+    try:
+        with open("semantic_model.yaml", "r") as f:
+            semantic_model_yaml = f.read()
+    except FileNotFoundError:
+        semantic_model_yaml = "Semantic model not available"
+
+    # Read documents info
+    try:
+        with open("./generated_csvs/DOCUMENTS.csv", "r") as f:
+            # Read first few lines to understand document types
+            lines = f.readlines()[:6]  # Header + 5 sample rows
+            document_info = "\n".join(lines)
+    except FileNotFoundError:
+        document_info = "Document data not available"
+
+    # Generate descriptions
+    semantic_chain = semantic_model_prompt | llm | StrOutputParser()
+    documents_chain = documents_prompt | llm | StrOutputParser()
+
+    snowflake_data_description = semantic_chain.invoke(
+        {"semantic_model_yaml": semantic_model_yaml}
+    )
+
+    documents_description = documents_chain.invoke({"document_info": document_info})
+
+    context["snowflake_data_description"] = snowflake_data_description
+    context["documents_description"] = documents_description
+
+    return context
+
+
 def create_agent(context, writer):
     agent_name = context.get("agent_name", "Demo Agent")
     writer("Creating Cortex Agent...")
     session = get_snowflake_session(context)
     database = session.get_current_database()
     schema = session.get_current_schema()
-    session.sql(
-        """
-            CREATE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.{agent_api_path}
-            WITH PROFILE='{{ "display_name": "{agent_name}" }}'
-                COMMENT=$${agent_description_markdown}$$
-            FROM SPECIFICATION $$
-            {{
-                "models": {{ "orchestration": "auto" }},
-                "instructions": {{
-                    "response": "",
-                    "orchestration": "",
-                    "sample_questions": [
-                        {{ "question": "{sample_q_1}" }},
-                        {{ "question": "{sample_q_2}" }},
-                        {{ "question": "{sample_q_3}" }},
-                        {{ "question": "{sample_q_4}" }},
-                        {{ "question": "{sample_q_5}" }}
-                    ]
-                }},
-                "tools": [
-                    {{
-                        "tool_spec": {{
-                        "name": "Documents",
-                        "type": "cortex_search"
-                        }}
-                    }},
-                    {{
-                        "tool_spec": {{
-                        "name": "Snowflake_Data",
-                        "type": "cortex_analyst_text_to_sql"
-                        }}
-                    }}
-                ],
-                "tool_resources": {{
-                    "Documents": {{
-                        "id_column": "DOCUMENT_URL",
-                        "max_results": 10,
-                        "name": "{cortex_search_path}"
-                    }},
-                    "Snowflake_Data": {{
-                        "semantic_model_file": "{semantic_model_path}"
-                    }}
-                    }}
-            }}
-            $$;
-        """.format(
-            agent_api_path=agent_name.replace(" ", "_").upper(),
-            agent_name=agent_name,
-            agent_description_markdown=context.get(
-                "agent_description_markdown", ""
-            ).replace("'", '"'),
-            cortex_search_path=context.get("cortex_search_path"),
-            semantic_model_path=context.get("semantic_model_path"),
-            sample_q_1=context.get("sample_q_1", "").replace("'", '"'),
-            sample_q_2=context.get("sample_q_2", "").replace("'", '"'),
-            sample_q_3=context.get("sample_q_3", "").replace("'", '"'),
-            sample_q_4=context.get("sample_q_4", "").replace("'", '"'),
-            sample_q_5=context.get("sample_q_5", "").replace("'", '"'),
-        )
-    ).collect()
+
+    # Get the warehouse name from session or use default
+    try:
+        warehouse = session.get_current_warehouse() or "SNOWFLAKE_INTELLIGENCE_WH"
+    except:
+        warehouse = "SNOWFLAKE_INTELLIGENCE_WH"
+
+    # Create the agent specification JSON
+    agent_spec = {
+        "models": {"orchestration": "auto"},
+        "orchestration": {},
+        "instructions": {
+            "sample_questions": [
+                {"question": context.get("sample_q_1", "")},
+                {"question": context.get("sample_q_2", "")},
+                {"question": context.get("sample_q_3", "")},
+                {"question": context.get("sample_q_4", "")},
+                {"question": context.get("sample_q_5", "")},
+            ]
+        },
+        "tools": [
+            {
+                "tool_spec": {
+                    "type": "cortex_analyst_text_to_sql",
+                    "name": "Snowflake_Data",
+                    "description": context.get(
+                        "snowflake_data_description",
+                        "Access to structured data via SQL queries",
+                    ),
+                }
+            },
+            {
+                "tool_spec": {
+                    "type": "cortex_search",
+                    "name": "Documents",
+                    "description": context.get(
+                        "documents_description", "Search through document repository"
+                    ),
+                }
+            },
+        ],
+        "tool_resources": {
+            "Documents": {
+                "id_column": "DOCUMENT_URL",
+                "max_results": 10,
+                "name": context.get("cortex_search_path"),
+            },
+            "Snowflake_Data": {
+                "execution_environment": {"type": "warehouse", "warehouse": warehouse},
+                "semantic_model_file": context.get("semantic_model_path"),
+            },
+        },
+    }
+
+    import json
+
+    agent_spec_json = json.dumps(agent_spec)
+
+    # Clean descriptions for JSON compatibility
+    agent_description = (
+        context.get("agent_description_markdown", "")
+        .replace('"', '\\"')
+        .replace("'", "\\'")
+    )
+
+    # Create the agent using parameterized query approach
+    create_agent_sql = f"""
+        CREATE AGENT SNOWFLAKE_INTELLIGENCE.AGENTS.{agent_name.replace(" ", "_").upper()}
+        WITH PROFILE='{{"display_name": "{agent_name}"}}'
+        COMMENT=$${agent_description}$$
+        FROM SPECIFICATION $${agent_spec_json}$$;
+    """
+
+    session.sql(create_agent_sql).collect()
 
     return context

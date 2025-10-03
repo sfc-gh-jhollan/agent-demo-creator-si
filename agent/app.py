@@ -52,6 +52,8 @@ class AppState(TypedDict):
     sample_q_3: str
     sample_q_4: str
     sample_q_5: str
+    snowflake_data_description: str
+    documents_description: str
 
 
 # Update the StateGraph to use the defined schema
@@ -69,6 +71,7 @@ from nodes.upload_to_snowflake import (
     upload_semantic_model,
     create_agent,
     create_cortex_search,
+    generate_tool_descriptions,
 )
 from nodes.generate_semantic_model import generate_semantic_model
 from nodes.fix_python_script import fix_python_script
@@ -88,6 +91,7 @@ workflow.add_node("GenerateSemanticModel", generate_semantic_model)
 workflow.add_node("FixPythonScript", fix_python_script)
 workflow.add_node("UploadSemanticModel", upload_semantic_model)
 workflow.add_node("CreateCortexSearch", create_cortex_search)
+workflow.add_node("GenerateToolDescriptions", generate_tool_descriptions)
 workflow.add_node("CreateAgent", create_agent)
 workflow.add_node("CheckDatasetScript", check_dataset_script)
 workflow.add_node("CheckSemanticModel", check_semantic_model)
@@ -117,7 +121,8 @@ workflow.add_edge("GenerateSemanticModel", "CheckSemanticModel")
 workflow.add_edge("CheckSemanticModel", "UploadSemanticModel")
 workflow.add_edge("UploadSemanticModel", "CreateCortexSearch")
 workflow.add_edge("CreateCortexSearch", "GenerateAgentDescription")
-workflow.add_edge("GenerateAgentDescription", "CreateAgent")
+workflow.add_edge("GenerateAgentDescription", "GenerateToolDescriptions")
+workflow.add_edge("GenerateToolDescriptions", "CreateAgent")
 workflow.add_edge("CreateAgent", "DisplayResults")
 workflow.add_edge("DisplayResults", END)
 
